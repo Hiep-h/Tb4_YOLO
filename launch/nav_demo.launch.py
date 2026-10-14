@@ -1,0 +1,65 @@
+import os
+
+from launch import LaunchDescription
+from launch.actions import (DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription,
+                            RegisterEventHandler, TimerAction, UnsetEnvironmentVariable)
+from launch.event_handlers import OnProcessExit
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.substitutions import FindPackageShare
+
+
+def generate_launch_description():
+    pkg = FindPackageShare('tb4_yolo')
+    args = [
+        DeclareLaunchArgument('world', default_value='small_house'),
+        DeclareLaunchArgument('x', default_value='1.0', description='vi tri xuat phat trong world (giong luc ve map)'),
+        DeclareLaunchArgument('y', default_value='1.0'),
+        DeclareLaunchArgument('yaw', default_value='0.0'),
+        DeclareLaunchArgument('map', default_value=PathJoinSubstitution([pkg, 'maps', 'map_clean.yaml']), description='map.yaml (mac dinh ban da lam sach); dung maps/map.yaml de dung ban goc cua SLAM'),
+        DeclareLaunchArgument('software_render', default_value='true'),
+        DeclareLaunchArgument('safety_override', default_value='full'),
+    ]
+    sim = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(PathJoinSubstitution([pkg, 'launch', 'sim.launch.py'])),
+        launch_arguments={'world': LaunchConfiguration('world'), 'rviz': 'false',
+                          'x': LaunchConfiguration('x'), 'y': LaunchConfiguration('y'), 'yaw': LaunchConfiguration('yaw'),
+                          'software_render': LaunchConfiguration('software_render')}.items(),
+    )
+
+    unset = UnsetEnvironmentVariable(name='LIBGL_ALWAYS_SOFTWARE')
+    safety = TimerAction(period=30.0, actions=[ExecuteProcess(
+        cmd=['bash', '-c', 'for i in $(seq 1 40); do ros2 param set /motion_control safety_override '
+             + '$0 && break; sleep 5; done', LaunchConfiguration('safety_override')], output='screen')])
+    nav_pkg = FindPackageShare('turtlebot4_navigation')
+
+    def wait_for(shell_cond, name):
+        return ExecuteProcess(
+            cmd=['bash', '-c', 'for i in $(seq 1 240); do (%s) >/dev/null 2>&1 && exit 0; sleep 5; done; exit 0' % shell_cond],
+            name=name, output='log')
+
+
+    wait_sim = wait_for("ros2 control list_controllers | grep -Ei 'diff_?drive_controller.*active'", 'wait_sim')
+    localization = [
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(PathJoinSubstitution([nav_pkg, 'launch', 'localization.launch.py'])),
+            launch_arguments={'map': LaunchConfiguration('map'), 'use_sim_time': 'true'}.items()),
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(PathJoinSubstitution(
+                [FindPackageShare('turtlebot4_viz'), 'launch', 'view_robot.launch.py'])),
+            launch_arguments={'use_sim_time': 'true'}.items()),
+    ]
+
+    wait_amcl = wait_for("ros2 lifecycle get /amcl | grep -qi active", 'wait_amcl')
+    cov = '[' + ', '.join(['0.25' if i in (0, 7) else '0.07' if i == 35 else '0.0' for i in range(36)]) + ']'
+    pose = ('{header: {frame_id: map}, pose: {pose: {position: {x: 0.0, y: 0.0, z: 0.0}, '
+            'orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}, covariance: %s}}' % cov)
+    initial = ExecuteProcess(
+        cmd=['ros2', 'topic', 'pub', '-t', '8', '-r', '1', '/initialpose',
+             'geometry_msgs/msg/PoseWithCovarianceStamped', pose], output='screen')
+    nav2 = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(PathJoinSubstitution([nav_pkg, 'launch', 'nav2.launch.py'])),
+        launch_arguments={'use_sim_time': 'true'}.items())
+    on_sim = RegisterEventHandler(OnProcessExit(target_action=wait_sim, on_exit=localization + [wait_amcl]))
+    on_amcl = RegisterEventHandler(OnProcessExit(target_action=wait_amcl, on_exit=[initial, nav2]))
+    return LaunchDescription(args + [sim, unset, safety, wait_sim, on_sim, on_amcl])

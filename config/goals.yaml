@@ -1,0 +1,4 @@
+goals:
+  - {name: "Goal 1 - goc tay nam", x: -8.0, y: -4.5, yaw_deg: 90.0}
+  - {name: "Goal 2 - goc dong nam", x: 5.5, y: -3.5, yaw_deg: 90.0}
+  - {name: "Goal 3 - khu ban an phia dong", x: 4.5, y: 1.0, yaw_deg: 0.0}
