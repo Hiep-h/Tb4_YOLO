@@ -1,5 +1,5 @@
 #!/bin/bash
-set -uo pipefail
+set -o pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG=~/lab05_launch.log
@@ -63,4 +63,7 @@ echo "# Terminal toa do (clicked_point):"
 echo "source /opt/ros/humble/setup.bash && source ~/tb4_ws/install/setup.bash && ros2 topic echo /clicked_point"
 echo ""
 echo "# Lenh node dieu huong (chay khi ban san sang):"
-echo "source /opt/ros/humble/setup.bash && source ~/tb4_ws/install/setup.bash && ros2 run tb4_yolo goal_navigator --ros-args -p use_sim_time:=true -p goals_file:=\$HOME/tb4_ws/src/Tb4_YOLO/config/goals.yaml -p dwell:=5.0"
+echo "source /opt/ros/humble/setup.bash && source ~/tb4_ws/install/setup.bash && ros2 run tb4_yolo goal_navigator --ros-args -p use_sim_time:=true -p goals_file:=\$HOME/tb4_clicked_goals.yaml -p dwell:=5.0"
+echo ""
+echo "# Lenh reset lai danh sach goal da nhap (neu can nhap lai):"
+echo "source /opt/ros/humble/setup.bash && source ~/tb4_ws/install/setup.bash && ros2 service call /reset_goals std_srvs/srv/Empty {}"

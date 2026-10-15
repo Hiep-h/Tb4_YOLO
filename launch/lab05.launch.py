@@ -30,6 +30,11 @@ def generate_launch_description():
         DeclareLaunchArgument('save_dir', default_value='', description='thu muc luu anh nhan dien dau tien cua moi lop'),
         DeclareLaunchArgument('rviz', default_value='true', description='tu chay rviz2 voi config/lab05.rviz (co display YOLO)'),
         DeclareLaunchArgument('markers', default_value='true', description='tu chay node goal_markers'),
+        DeclareLaunchArgument('record_file', default_value=os.path.expanduser('~/tb4_clicked_goals.yaml'),
+                               description='file goal_markers ghi tu cac diem /clicked_point'),
+        DeclareLaunchArgument('max_goals', default_value='3', description='so goal toi da goal_markers ghi'),
+        DeclareLaunchArgument('costmap_topic', default_value='/global_costmap/costmap'),
+        DeclareLaunchArgument('clearance_cost', default_value='60', description='nguong cost toi da de diem nhap hop le'),
     ]
     base = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(PathJoinSubstitution([pkg, 'launch', 'nav_demo.launch.py'])),
@@ -46,7 +51,11 @@ def generate_launch_description():
                              'save_dir': LaunchConfiguration('save_dir')}])
     markers = Node(package='tb4_yolo', executable='goal_markers', name='goal_markers', output='screen',
                    condition=IfCondition(LaunchConfiguration('markers')),
-                   parameters=[{'use_sim_time': True, 'goals_file': LaunchConfiguration('goals')}])
+                   parameters=[{'use_sim_time': True, 'goals_file': LaunchConfiguration('goals'),
+                                'record_file': LaunchConfiguration('record_file'),
+                                'max_goals': LaunchConfiguration('max_goals'),
+                                'costmap_topic': LaunchConfiguration('costmap_topic'),
+                                'clearance_cost': LaunchConfiguration('clearance_cost')}])
     wait_nav2 = ExecuteProcess(
         cmd=['bash', '-c', 'for i in $(seq 1 240); do '
              '(ros2 lifecycle get /amcl | grep -qi active) && '
