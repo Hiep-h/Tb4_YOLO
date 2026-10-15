@@ -3,6 +3,7 @@ import os
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription,
                             RegisterEventHandler, TimerAction, UnsetEnvironmentVariable)
+from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
@@ -19,6 +20,7 @@ def generate_launch_description():
         DeclareLaunchArgument('map', default_value=PathJoinSubstitution([pkg, 'maps', 'map_clean.yaml']), description='map.yaml (mac dinh ban da lam sach); dung maps/map.yaml de dung ban goc cua SLAM'),
         DeclareLaunchArgument('software_render', default_value='true'),
         DeclareLaunchArgument('safety_override', default_value='full'),
+        DeclareLaunchArgument('viz', default_value='true', description='tu chay turtlebot4_viz (rviz2)'),
     ]
     sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(PathJoinSubstitution([pkg, 'launch', 'sim.launch.py'])),
@@ -47,7 +49,8 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(PathJoinSubstitution(
                 [FindPackageShare('turtlebot4_viz'), 'launch', 'view_robot.launch.py'])),
-            launch_arguments={'use_sim_time': 'true'}.items()),
+            launch_arguments={'use_sim_time': 'true'}.items(),
+            condition=IfCondition(LaunchConfiguration('viz'))),
     ]
 
     wait_amcl = wait_for("ros2 lifecycle get /amcl | grep -qi active", 'wait_amcl')

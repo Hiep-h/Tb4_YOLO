@@ -25,13 +25,19 @@ def generate_launch_description():
         DeclareLaunchArgument('dwell', default_value='5.0', description='giay dung tai moi goal'),
         DeclareLaunchArgument('run_yolo', default_value='true', description='tu khoi dong yolo_detector sau khi Nav2 active'),
         DeclareLaunchArgument('yolo_model', default_value=os.path.expanduser('~/yolov8n.pt')),
-        DeclareLaunchArgument('conf', default_value='0.35'),
+        DeclareLaunchArgument('conf', default_value='0.45'),
         DeclareLaunchArgument('show_window', default_value='true'),
         DeclareLaunchArgument('save_dir', default_value='', description='thu muc luu anh nhan dien dau tien cua moi lop'),
+        DeclareLaunchArgument('rviz', default_value='true', description='tu chay rviz2 voi config/lab05.rviz (co display YOLO)'),
     ]
     base = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(PathJoinSubstitution([pkg, 'launch', 'nav_demo.launch.py'])),
-        launch_arguments={k: LaunchConfiguration(k) for k in ('world', 'x', 'y', 'yaw', 'map')}.items())
+        launch_arguments={**{k: LaunchConfiguration(k) for k in ('world', 'x', 'y', 'yaw', 'map')}, 'viz': 'false'}.items())
+    rviz = Node(package='rviz2', executable='rviz2', name='rviz2',
+                arguments=['-d', PathJoinSubstitution([pkg, 'config', 'lab05.rviz'])],
+                parameters=[{'use_sim_time': True}],
+                remappings=[('/tf', 'tf'), ('/tf_static', 'tf_static')],
+                condition=IfCondition(LaunchConfiguration('rviz')), output='screen')
     yolo = Node(package='tb4_yolo', executable='yolo_detector', name='yolo_detector', output='screen',
                 parameters=[{'use_sim_time': True, 'model': LaunchConfiguration('yolo_model'),
                              'conf': LaunchConfiguration('conf'),
@@ -48,4 +54,4 @@ def generate_launch_description():
              condition=IfCondition(LaunchConfiguration('run_navigator')),
              parameters=[{'use_sim_time': True, 'goals_file': LaunchConfiguration('goals'),
                           'dwell': LaunchConfiguration('dwell')}])])
-    return LaunchDescription(args + [base, wait_nav2, on_nav2, navigator])
+    return LaunchDescription(args + [base, rviz, wait_nav2, on_nav2, navigator])
