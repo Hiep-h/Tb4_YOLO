@@ -1,13 +1,15 @@
 #!/bin/bash
-set -o pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG=~/lab05_launch.log
 
 bash "$SCRIPT_DIR/stop_all.sh"
 
+set +u
 source /opt/ros/humble/setup.bash
 source ~/tb4_ws/install/setup.bash
+set -u
 
 cd ~/tb4_ws
 setsid nohup ros2 launch tb4_yolo lab05.launch.py world:=small_house x:=1.0 y:=1.0 \
@@ -23,7 +25,7 @@ elapsed=0
 until [ "$elapsed" -ge 1200 ]; do
     amcl=$(ros2 lifecycle get /amcl 2>/dev/null)
     bt=$(ros2 lifecycle get /bt_navigator 2>/dev/null)
-    if echo "$amcl" | grep -qi active && echo "$bt" | grep -qi active; then
+    if echo "$amcl" | grep -qE '^active' && echo "$bt" | grep -qE '^active'; then
         nav2_ok=true
         break
     fi

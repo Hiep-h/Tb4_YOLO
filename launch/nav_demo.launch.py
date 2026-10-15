@@ -53,7 +53,7 @@ def generate_launch_description():
             condition=IfCondition(LaunchConfiguration('viz'))),
     ]
 
-    wait_amcl = wait_for("ros2 lifecycle get /amcl | grep -qi active", 'wait_amcl')
+    wait_amcl = wait_for("ros2 lifecycle get /amcl | grep -qE '^active'", 'wait_amcl')
     cov = '[' + ', '.join(['0.25' if i in (0, 7) else '0.07' if i == 35 else '0.0' for i in range(36)]) + ']'
     pose = ('{header: {frame_id: map}, pose: {pose: {position: {x: 0.0, y: 0.0, z: 0.0}, '
             'orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}, covariance: %s}}' % cov)

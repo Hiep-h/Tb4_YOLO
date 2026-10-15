@@ -26,7 +26,7 @@ def generate_launch_description():
         DeclareLaunchArgument('run_yolo', default_value='true', description='tu khoi dong yolo_detector sau khi Nav2 active'),
         DeclareLaunchArgument('yolo_model', default_value=os.path.expanduser('~/yolov8n.pt')),
         DeclareLaunchArgument('conf', default_value='0.45'),
-        DeclareLaunchArgument('show_window', default_value='true'),
+        DeclareLaunchArgument('show_window', default_value='false'),
         DeclareLaunchArgument('save_dir', default_value='', description='thu muc luu anh nhan dien dau tien cua moi lop'),
         DeclareLaunchArgument('rviz', default_value='true', description='tu chay rviz2 voi config/lab05.rviz (co display YOLO)'),
         DeclareLaunchArgument('markers', default_value='true', description='tu chay node goal_markers'),
@@ -58,8 +58,8 @@ def generate_launch_description():
                                 'clearance_cost': LaunchConfiguration('clearance_cost')}])
     wait_nav2 = ExecuteProcess(
         cmd=['bash', '-c', 'for i in $(seq 1 240); do '
-             '(ros2 lifecycle get /amcl | grep -qi active) && '
-             '(ros2 lifecycle get /bt_navigator | grep -qi active) && exit 0; sleep 5; done; exit 0'],
+             "(ros2 lifecycle get /amcl | grep -qE '^active') && "
+             "(ros2 lifecycle get /bt_navigator | grep -qE '^active') && exit 0; sleep 5; done; exit 0"],
         name='wait_nav2', output='log', condition=IfCondition(LaunchConfiguration('run_yolo')))
     on_nav2 = RegisterEventHandler(OnProcessExit(target_action=wait_nav2, on_exit=[yolo]))
     navigator = TimerAction(period=LaunchConfiguration('navigator_delay'), actions=[
