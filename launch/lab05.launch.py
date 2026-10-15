@@ -29,6 +29,7 @@ def generate_launch_description():
         DeclareLaunchArgument('show_window', default_value='true'),
         DeclareLaunchArgument('save_dir', default_value='', description='thu muc luu anh nhan dien dau tien cua moi lop'),
         DeclareLaunchArgument('rviz', default_value='true', description='tu chay rviz2 voi config/lab05.rviz (co display YOLO)'),
+        DeclareLaunchArgument('markers', default_value='true', description='tu chay node goal_markers'),
     ]
     base = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(PathJoinSubstitution([pkg, 'launch', 'nav_demo.launch.py'])),
@@ -43,6 +44,9 @@ def generate_launch_description():
                              'conf': LaunchConfiguration('conf'),
                              'show_window': LaunchConfiguration('show_window'),
                              'save_dir': LaunchConfiguration('save_dir')}])
+    markers = Node(package='tb4_yolo', executable='goal_markers', name='goal_markers', output='screen',
+                   condition=IfCondition(LaunchConfiguration('markers')),
+                   parameters=[{'use_sim_time': True, 'goals_file': LaunchConfiguration('goals')}])
     wait_nav2 = ExecuteProcess(
         cmd=['bash', '-c', 'for i in $(seq 1 240); do '
              '(ros2 lifecycle get /amcl | grep -qi active) && '
@@ -54,4 +58,4 @@ def generate_launch_description():
              condition=IfCondition(LaunchConfiguration('run_navigator')),
              parameters=[{'use_sim_time': True, 'goals_file': LaunchConfiguration('goals'),
                           'dwell': LaunchConfiguration('dwell')}])])
-    return LaunchDescription(args + [base, rviz, wait_nav2, on_nav2, navigator])
+    return LaunchDescription(args + [base, rviz, markers, wait_nav2, on_nav2, navigator])

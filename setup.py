@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'goal_navigator = tb4_yolo.goal_navigator:main',
+            'goal_markers = tb4_yolo.goal_markers:main',
             'yolo_detector = tb4_yolo.yolo_detector:main',
         ],
     },
