@@ -1,6 +1,10 @@
+import os
+
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
+from launch.actions import (DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription,
+                            RegisterEventHandler, TimerAction)
 from launch.conditions import IfCondition
+from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -19,7 +23,8 @@ def generate_launch_description():
         DeclareLaunchArgument('run_navigator', default_value='true', description='tu chay node goal_navigator'),
         DeclareLaunchArgument('navigator_delay', default_value='20.0', description='giay cho sau khi khoi dong truoc khi cho Nav2'),
         DeclareLaunchArgument('dwell', default_value='5.0', description='giay dung tai moi goal'),
-        DeclareLaunchArgument('model', default_value='yolov8n.pt'),
+        DeclareLaunchArgument('run_yolo', default_value='true', description='tu khoi dong yolo_detector sau khi Nav2 active'),
+        DeclareLaunchArgument('yolo_model', default_value=os.path.expanduser('~/yolov8n.pt')),
         DeclareLaunchArgument('conf', default_value='0.35'),
         DeclareLaunchArgument('show_window', default_value='true'),
         DeclareLaunchArgument('save_dir', default_value='', description='thu muc luu anh nhan dien dau tien cua moi lop'),
@@ -28,13 +33,19 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(PathJoinSubstitution([pkg, 'launch', 'nav_demo.launch.py'])),
         launch_arguments={k: LaunchConfiguration(k) for k in ('world', 'x', 'y', 'yaw', 'map')}.items())
     yolo = Node(package='tb4_yolo', executable='yolo_detector', name='yolo_detector', output='screen',
-                parameters=[{'use_sim_time': True, 'model': LaunchConfiguration('model'),
+                parameters=[{'use_sim_time': True, 'model': LaunchConfiguration('yolo_model'),
                              'conf': LaunchConfiguration('conf'),
                              'show_window': LaunchConfiguration('show_window'),
                              'save_dir': LaunchConfiguration('save_dir')}])
+    wait_nav2 = ExecuteProcess(
+        cmd=['bash', '-c', 'for i in $(seq 1 240); do '
+             '(ros2 lifecycle get /amcl | grep -qi active) && '
+             '(ros2 lifecycle get /bt_navigator | grep -qi active) && exit 0; sleep 5; done; exit 0'],
+        name='wait_nav2', output='log', condition=IfCondition(LaunchConfiguration('run_yolo')))
+    on_nav2 = RegisterEventHandler(OnProcessExit(target_action=wait_nav2, on_exit=[yolo]))
     navigator = TimerAction(period=LaunchConfiguration('navigator_delay'), actions=[
         Node(package='tb4_yolo', executable='goal_navigator', name='goal_navigator', output='screen',
              condition=IfCondition(LaunchConfiguration('run_navigator')),
              parameters=[{'use_sim_time': True, 'goals_file': LaunchConfiguration('goals'),
                           'dwell': LaunchConfiguration('dwell')}])])
-    return LaunchDescription(args + [base, yolo, navigator])
+    return LaunchDescription(args + [base, wait_nav2, on_nav2, navigator])

@@ -3,12 +3,25 @@ import os
 import time
 
 import cv2
+import numpy as np
 import rclpy
 from cv_bridge import CvBridge
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
+
+
+def bgr8_to_imgmsg(frame, header):
+    frame = np.ascontiguousarray(frame)
+    msg = Image()
+    msg.header = header
+    msg.height, msg.width = frame.shape[:2]
+    msg.encoding = 'bgr8'
+    msg.is_bigendian = 0
+    msg.step = frame.shape[1] * 3
+    msg.data = frame.tobytes()
+    return msg
 
 
 class YoloDetector(Node):
@@ -67,8 +80,7 @@ class YoloDetector(Node):
             self.seen[name] = max(self.seen.get(name, 0.0), conf)
 
         annotated = result.plot()
-        out = self.bridge.cv2_to_imgmsg(annotated, encoding='bgr8')
-        out.header = msg.header
+        out = bgr8_to_imgmsg(annotated, msg.header)
         self.pub_image.publish(out)
         self.pub_det.publish(String(data=json.dumps(found)))
 
