@@ -28,7 +28,7 @@ def generate_launch_description():
         DeclareLaunchArgument('conf', default_value='0.45'),
         DeclareLaunchArgument('show_window', default_value='false'),
         DeclareLaunchArgument('save_dir', default_value='', description='thu muc luu anh nhan dien dau tien cua moi lop'),
-        DeclareLaunchArgument('rviz', default_value='true', description='tu chay rviz2 voi config/lab05.rviz (co display YOLO)'),
+        DeclareLaunchArgument('show_rviz', default_value='true', description='tu chay rviz2 voi config/lab05.rviz (co display YOLO)'),
         DeclareLaunchArgument('markers', default_value='true', description='tu chay node goal_markers'),
         DeclareLaunchArgument('record_file', default_value=os.path.expanduser('~/tb4_clicked_goals.yaml'),
                                description='file goal_markers ghi tu cac diem /clicked_point'),
@@ -43,7 +43,7 @@ def generate_launch_description():
                 arguments=['-d', PathJoinSubstitution([pkg, 'config', 'lab05.rviz'])],
                 parameters=[{'use_sim_time': True}],
                 remappings=[('/tf', 'tf'), ('/tf_static', 'tf_static')],
-                condition=IfCondition(LaunchConfiguration('rviz')), output='screen')
+                condition=IfCondition(LaunchConfiguration('show_rviz')), output='screen')
     yolo = Node(package='tb4_yolo', executable='yolo_detector', name='yolo_detector', output='screen',
                 parameters=[{'use_sim_time': True, 'model': LaunchConfiguration('yolo_model'),
                              'conf': LaunchConfiguration('conf'),
