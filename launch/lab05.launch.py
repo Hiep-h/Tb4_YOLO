@@ -25,7 +25,8 @@ def generate_launch_description():
         DeclareLaunchArgument('dwell', default_value='5.0', description='giay dung tai moi goal'),
         DeclareLaunchArgument('run_yolo', default_value='true', description='tu khoi dong yolo_detector sau khi Nav2 active'),
         DeclareLaunchArgument('yolo_model', default_value=os.path.expanduser('~/yolov8n.pt')),
-        DeclareLaunchArgument('conf', default_value='0.45'),
+        DeclareLaunchArgument('conf', default_value='0.4'),
+        DeclareLaunchArgument('imgsz', default_value='640'),
         DeclareLaunchArgument('show_window', default_value='false'),
         DeclareLaunchArgument('save_dir', default_value='', description='thu muc luu anh nhan dien dau tien cua moi lop'),
         DeclareLaunchArgument('show_rviz', default_value='true', description='tu chay rviz2 voi config/lab05.rviz (co display YOLO)'),
@@ -48,6 +49,7 @@ def generate_launch_description():
     yolo = Node(package='tb4_yolo', executable='yolo_detector', name='yolo_detector', output='screen',
                 parameters=[{'use_sim_time': True, 'model': LaunchConfiguration('yolo_model'),
                              'conf': LaunchConfiguration('conf'),
+                             'imgsz': LaunchConfiguration('imgsz'),
                              'show_window': LaunchConfiguration('show_window'),
                              'save_dir': LaunchConfiguration('save_dir')}])
     markers = Node(package='tb4_yolo', executable='goal_markers', name='goal_markers', output='screen',

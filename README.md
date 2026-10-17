@@ -79,7 +79,7 @@ ros2 run tb4_yolo goal_navigator --ros-args -p use_sim_time:=true -p goals_file:
 ros2 run tb4_yolo yolo_detector --ros-args -p use_sim_time:=true -p conf:=0.3
 ```
 
-Tham số hay dùng: `model` (`yolov8n.pt`, `yolo11n.pt`, ...), `conf`, `image_topic` (mặc định `/oakd/rgb/preview/image_raw`), `rate` (số khung xử lý mỗi giây, mặc định 2), `dwell`. Mặc định không mở cửa sổ OpenCV, xem ảnh nhận diện trong RViz2: Add → By topic → `/yolo/image` → Image (hoặc `show_window:=true` để mở lại cửa sổ OpenCV).
+Tham số hay dùng: `model` (`yolov8n.pt`, `yolo11n.pt`, ...), `conf` (mặc định 0.4), `imgsz` (mặc định 640), `image_topic` (mặc định `/oakd/rgb/preview/image_raw`), `rate` (số khung xử lý mỗi giây, mặc định 2), `dwell`. Mặc định không mở cửa sổ OpenCV, xem ảnh nhận diện trong RViz2: Add → By topic → `/yolo/image` → Image (hoặc `show_window:=true` để mở lại cửa sổ OpenCV).
 
 ## 4. Tọa độ goal
 
