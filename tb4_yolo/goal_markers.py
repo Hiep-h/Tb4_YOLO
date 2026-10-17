@@ -36,7 +36,7 @@ class GoalMarkers(Node):
         self.declare_parameter('max_goals', 3)
         self.declare_parameter('costmap_topic', '/global_costmap/costmap')
         self.declare_parameter('clearance_cost', 60)
-        self.declare_parameter('clearance_radius_m', 0.6)
+        self.declare_parameter('clearance_radius_m', 0.3)
 
         self.frame_id = self.get_parameter('frame_id').value
         self.record_path = os.path.expanduser(self.get_parameter('record_file').value)

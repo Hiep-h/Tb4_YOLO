@@ -36,7 +36,7 @@ def generate_launch_description():
         DeclareLaunchArgument('max_goals', default_value='3', description='so goal toi da goal_markers ghi'),
         DeclareLaunchArgument('costmap_topic', default_value='/global_costmap/costmap'),
         DeclareLaunchArgument('clearance_cost', default_value='60', description='nguong cost toi da de diem nhap hop le'),
-        DeclareLaunchArgument('clearance_radius_m', default_value='0.6', description='ban kinh (m) quanh diem nhap can thoang, khong vat can/unknown'),
+        DeclareLaunchArgument('clearance_radius_m', default_value='0.3', description='ban kinh (m) quanh diem nhap can thoang, khong vat can/unknown'),
     ]
     base = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(PathJoinSubstitution([pkg, 'launch', 'nav_demo.launch.py'])),
