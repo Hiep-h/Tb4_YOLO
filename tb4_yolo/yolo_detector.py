@@ -32,7 +32,7 @@ class YoloDetector(Node):
         self.declare_parameter('conf', 0.45)
         self.declare_parameter('imgsz', 320)
         self.declare_parameter('rate', 2.0)
-        self.declare_parameter('show_window', True)
+        self.declare_parameter('show_window', False)
         self.declare_parameter('save_dir', '')
 
         from ultralytics import YOLO

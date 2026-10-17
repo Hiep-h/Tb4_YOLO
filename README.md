@@ -67,7 +67,7 @@ Gazebo dựng bằng phần mềm trên card Intel nên chậm. Giảm tải LiD
 ros2 launch tb4_yolo lab05.launch.py world:=small_house x:=1.0 y:=1.0 save_dir:=$HOME/yolo_out
 ```
 
-Launch chờ Gazebo sẵn sàng, chạy AMCL với `maps/map_clean.yaml`, đặt vị trí ban đầu (0, 0, 0), bật Nav2 và RViz2. Sau đó `goal_navigator` tự đi qua Goal 1 → 2 → 3 (dừng 5 s mỗi goal) và cửa sổ "YOLO - TurtleBot 4" hiển thị kết quả nhận diện. Ctrl+C dừng node YOLO, node in danh sách lớp đã thấy. Không điều khiển thủ công và không đặt goal bằng chuột.
+Launch chờ Gazebo sẵn sàng, chạy AMCL với `maps/map_clean.yaml`, đặt vị trí ban đầu (0, 0, 0), bật Nav2 và RViz2. Sau đó `goal_navigator` tự đi qua Goal 1 → 2 → 3 (dừng 5 s mỗi goal) và panel YOLO trong RViz2 (topic `/yolo/image`) hiển thị kết quả nhận diện. Ctrl+C dừng node YOLO, node in danh sách lớp đã thấy. Không điều khiển thủ công và không đặt goal bằng chuột.
 
 Dùng bản đồ gốc: thêm `map:=$HOME/tb4_ws/src/Tb4_YOLO/maps/map.yaml`.
 
@@ -79,7 +79,7 @@ ros2 run tb4_yolo goal_navigator --ros-args -p use_sim_time:=true -p goals_file:
 ros2 run tb4_yolo yolo_detector --ros-args -p use_sim_time:=true -p conf:=0.3
 ```
 
-Tham số hay dùng: `model` (`yolov8n.pt`, `yolo11n.pt`, ...), `conf`, `image_topic` (mặc định `/oakd/rgb/preview/image_raw`), `rate` (số khung xử lý mỗi giây, mặc định 2), `dwell`, `show_window:=false` khi không có màn hình. Xem ảnh nhận diện trong RViz2: Add → By topic → `/yolo/image` → Image.
+Tham số hay dùng: `model` (`yolov8n.pt`, `yolo11n.pt`, ...), `conf`, `image_topic` (mặc định `/oakd/rgb/preview/image_raw`), `rate` (số khung xử lý mỗi giây, mặc định 2), `dwell`. Mặc định không mở cửa sổ OpenCV, xem ảnh nhận diện trong RViz2: Add → By topic → `/yolo/image` → Image (hoặc `show_window:=true` để mở lại cửa sổ OpenCV).
 
 ## 4. Tọa độ goal
 
