@@ -35,6 +35,7 @@ def generate_launch_description():
         DeclareLaunchArgument('max_goals', default_value='3', description='so goal toi da goal_markers ghi'),
         DeclareLaunchArgument('costmap_topic', default_value='/global_costmap/costmap'),
         DeclareLaunchArgument('clearance_cost', default_value='60', description='nguong cost toi da de diem nhap hop le'),
+        DeclareLaunchArgument('clearance_radius_m', default_value='0.6', description='ban kinh (m) quanh diem nhap can thoang, khong vat can/unknown'),
     ]
     base = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(PathJoinSubstitution([pkg, 'launch', 'nav_demo.launch.py'])),
@@ -55,7 +56,8 @@ def generate_launch_description():
                                 'record_file': LaunchConfiguration('record_file'),
                                 'max_goals': LaunchConfiguration('max_goals'),
                                 'costmap_topic': LaunchConfiguration('costmap_topic'),
-                                'clearance_cost': LaunchConfiguration('clearance_cost')}])
+                                'clearance_cost': LaunchConfiguration('clearance_cost'),
+                                'clearance_radius_m': LaunchConfiguration('clearance_radius_m')}])
     wait_nav2 = ExecuteProcess(
         cmd=['bash', '-c', 'for i in $(seq 1 240); do '
              "(ros2 lifecycle get /amcl | grep -qE '^active') && "

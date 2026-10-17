@@ -36,11 +36,13 @@ class GoalMarkers(Node):
         self.declare_parameter('max_goals', 3)
         self.declare_parameter('costmap_topic', '/global_costmap/costmap')
         self.declare_parameter('clearance_cost', 60)
+        self.declare_parameter('clearance_radius_m', 0.6)
 
         self.frame_id = self.get_parameter('frame_id').value
         self.record_path = os.path.expanduser(self.get_parameter('record_file').value)
         self.max_goals = int(self.get_parameter('max_goals').value)
         self.clearance_cost = int(self.get_parameter('clearance_cost').value)
+        self.clearance_radius_m = float(self.get_parameter('clearance_radius_m').value)
         costmap_topic = self.get_parameter('costmap_topic').value
 
         goals_file = self.get_parameter('goals_file').value
@@ -102,11 +104,26 @@ class GoalMarkers(Node):
         row = int(math.floor((y - info.origin.position.y) / info.resolution))
         if col < 0 or col >= info.width or row < 0 or row >= info.height:
             return False, 'ngoai ban do'
-        val = grid.data[row * info.width + col]
-        if val < 0:
-            return False, 'o unknown'
-        if val >= self.clearance_cost:
-            return False, 'vat can gan (cost=%d)' % val
+
+        radius_cells = max(1, int(math.ceil(self.clearance_radius_m / info.resolution)))
+        min_dist = None
+        for dr in range(-radius_cells, radius_cells + 1):
+            r = row + dr
+            if r < 0 or r >= info.height:
+                continue
+            for dc in range(-radius_cells, radius_cells + 1):
+                c = col + dc
+                if c < 0 or c >= info.width:
+                    continue
+                dist = math.hypot(dc, dr) * info.resolution
+                if dist > self.clearance_radius_m:
+                    continue
+                val = grid.data[r * info.width + c]
+                if val < 0 or val >= self.clearance_cost:
+                    if min_dist is None or dist < min_dist:
+                        min_dist = dist
+        if min_dist is not None:
+            return False, 'qua gan vat can (cach %.2f m)' % min_dist
         return True, ''
 
     def write_record_file(self):
@@ -132,7 +149,10 @@ class GoalMarkers(Node):
         x, y = msg.point.x, msg.point.y
         ok, reason = self.validate_point(x, y)
         if not ok:
-            self.get_logger().warn('Diem (%.2f, %.2f) khong hop le: %s, hay nhap lai' % (x, y, reason))
+            if reason.startswith('qua gan vat can'):
+                self.get_logger().warn('Diem (%.2f, %.2f) %s, hay chon cho thoang hon' % (x, y, reason))
+            else:
+                self.get_logger().warn('Diem (%.2f, %.2f) khong hop le: %s, hay nhap lai' % (x, y, reason))
             return
 
         if self.recorded:
