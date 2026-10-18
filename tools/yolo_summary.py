@@ -4,7 +4,7 @@ import re
 import statistics
 import sys
 
-LINE_RE = re.compile(r'^\[(?P<proc>[^\]]+)\] \[(?P<level>[A-Z]+)\] \[(?P<ts>[0-9.]+)\] \[(?P<node>[^\]]+)\]: (?P<msg>.*)$')
+LINE_RE = re.compile(r'^(?:\[[^\]]+\] )?\[(?P<level>[A-Z]+)\] \[(?P<ts>[0-9.]+)\] \[(?P<node>[^\]]+)\]: (?P<msg>.*)$')
 FRAME_RE = re.compile(r'^khung (\d+) \(([0-9.]+) ms\): (.*)$')
 GOAL_START_RE = re.compile(r'^(Goal \d+): \(')
 GOAL_RESULT_RE = re.compile(r'^(Goal \d+): (THANH CONG|BI HUY|THAT BAI|KHONG RO)$')
