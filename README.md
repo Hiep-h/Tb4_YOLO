@@ -87,9 +87,13 @@ Tham số hay dùng: `model` (`yolov8n.pt`, `yolo11n.pt`, ...), `conf` (mặc đ
 ~/tb4_ws/src/Tb4_YOLO/scripts/demo_record.sh
 ```
 
-Nếu hệ thống chưa chạy, script tự gọi `demo_run.sh`; nếu đã chạy (Nav2 active) thì dùng luôn. Script xóa danh sách goal đã nhấp trước đó (`/reset_goals` + xóa `~/tb4_clicked_goals.yaml`) để nhập lại từ đầu, rồi mở 3 cửa sổ terminal nhỏ: **LOG YOLO/GOAL** (log lọc theo node), **CLICKED POINT** (toạ độ điểm vừa nhấp), **GOAL NAVIGATOR** (`goal_navigator` chạy với `wait_for_goals:=3`, tự chờ đủ 3 điểm nhấp rồi mới bắt đầu đi). Nếu máy không có `gnome-terminal`, script in sẵn 3 lệnh để tự mở.
+Mỗi lần chạy (không có tham số), script luôn đưa hệ thống về trạng thái ban đầu: nếu đang chạy thì dọn sạch bằng `stop_all.sh` rồi khởi động lại từ đầu bằng `demo_run.sh` (robot spawn lại ở điểm xuất phát); nếu chưa chạy thì khởi động mới. Sau khi AMCL và Nav2 active, script gửi lại `/initialpose` (0, 0, 0) vài lần và kiểm tra `/amcl_pose` có về gần gốc không, reset danh sách goal (`/reset_goals` + xóa `~/tb4_clicked_goals.yaml`), rồi mở 3 cửa sổ terminal nhỏ: **LOG YOLO/GOAL** (log lọc theo node), **CLICKED POINT** (toạ độ điểm vừa nhấp), **GOAL NAVIGATOR** (`goal_navigator` chạy với `wait_for_goals:=3`, tự chờ đủ 3 điểm nhấp rồi mới bắt đầu đi). Nếu máy không có `gnome-terminal`, script in sẵn các lệnh để tự mở. Cuối script in tóm tắt vị trí AMCL hiện tại và các lệnh hay dùng.
 
-Trong RViz2 bật **Publish Point** và nhấp 3 điểm trên bản đồ (tránh sát vật cản); cửa sổ GOAL NAVIGATOR tự đi qua lần lượt 3 điểm và in bảng tổng kết khi xong.
+Tham số:
+- `--reuse`: giữ nguyên hệ thống đang chạy (không dọn, không khởi động lại) — script chỉ in cảnh báo "robot co the dang o cho cu" rồi vẫn gửi lại initialpose và reset goal như bình thường.
+- `--reset-only`: dùng khi muốn nhấp lại 3 điểm mà chưa cần chạy lại từ đầu — chỉ gửi lại `/initialpose` và reset goal trên hệ thống đang chạy, không dọn và không mở lại 3 cửa sổ (trừ khi cửa sổ GOAL NAVIGATOR đã bắt đầu đi các goal cũ, lúc đó script cảnh báo cần Ctrl+C cửa sổ đó và tự mở lại cửa sổ GOAL NAVIGATOR mới). Yêu cầu hệ thống đã chạy từ trước.
+
+Trong RViz2 bật **Publish Point** và nhấp 3 điểm trên bản đồ (tránh sát vật cản); cửa sổ GOAL NAVIGATOR tự đi qua lần lượt 3 điểm và in bảng tổng kết khi xong. Nhấp nhầm thì reset lại bằng `ros2 service call /reset_goals std_srvs/srv/Empty {}`; cần gửi lại vị trí khởi tạo thì chạy lại `demo_record.sh --reset-only` hoặc tự publish `/initialpose` (lệnh in sẵn ở cuối script).
 
 ## 5. Tọa độ goal
 
