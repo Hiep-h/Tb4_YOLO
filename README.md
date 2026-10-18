@@ -18,11 +18,14 @@ Tb4_YOLO/
 │   └── lab05.launch.py          nav_demo + node goal + node YOLO
 ├── tb4_yolo/
 │   ├── goal_navigator.py        gửi goal tuần tự bằng nav2_simple_commander
+│   ├── goal_markers.py          hiển thị/ghi goal nhấp bằng Publish Point trong RViz2
 │   └── yolo_detector.py         nhận diện vật thể bằng YOLO từ camera
 ├── config/goals.yaml            tọa độ (x, y, yaw) các goal trong hệ map
 ├── maps/                        map.yaml + map.pgm (bản gốc SLAM), map_clean.* (đã làm sạch)
 ├── worlds/, models/             world small_house (AWS RoboMaker, MIT-0) bản nhẹ
-├── scripts/                     check_topics.sh, install_world.sh, lighten_sensors.sh, camera_rate.sh
+├── scripts/                     demo_run.sh, demo_record.sh, stop_all.sh, check_topics.sh,
+│                                install_world.sh, lighten_sensors.sh, camera_rate.sh
+├── tools/yolo_summary.py        tóm tắt log YOLO + goal_navigator thành bảng, xuất markdown
 └── package.xml, setup.py, setup.cfg
 ```
 

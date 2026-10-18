@@ -60,6 +60,7 @@ PATTERNS=(
     "rviz2"
     "tb4_yolo/yolo_detector"
     "tb4_yolo/goal_navigator"
+    "tb4_yolo/goal_markers"
     "turtlebot4_node"
     "turtlebot4_ignition"
     "irobot_create_nodes"
