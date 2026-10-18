@@ -46,7 +46,7 @@ class YoloDetector(Node):
 
         self.bridge = CvBridge()
         self.latest = None
-        self.saved = set()
+        self.saved_path = {}
         self.seen = {}
         self.frames = 0
         self.window_ok = self.show
@@ -77,7 +77,6 @@ class YoloDetector(Node):
             conf = float(box.conf[0])
             x1, y1, x2, y2 = [int(v) for v in box.xyxy[0].tolist()]
             found.append({'class': name, 'conf': round(conf, 2), 'box': [x1, y1, x2, y2]})
-            self.seen[name] = max(self.seen.get(name, 0.0), conf)
 
         annotated = result.plot()
         out = bgr8_to_imgmsg(annotated, msg.header)
@@ -87,11 +86,17 @@ class YoloDetector(Node):
         if found:
             text = ', '.join('%s %.2f' % (d['class'], d['conf']) for d in found)
             self.get_logger().info('khung %d (%.0f ms): %s' % (self.frames, ms, text))
-            if self.save_dir:
-                for d in found:
-                    if d['class'] not in self.saved:
-                        self.saved.add(d['class'])
-                        cv2.imwrite(os.path.join(self.save_dir, '%s.png' % d['class'].replace(' ', '_')), annotated)
+            for d in found:
+                if d['conf'] > self.seen.get(d['class'], 0.0):
+                    self.seen[d['class']] = d['conf']
+                    if self.save_dir:
+                        old_path = self.saved_path.get(d['class'])
+                        if old_path and os.path.exists(old_path):
+                            os.remove(old_path)
+                        new_path = os.path.join(
+                            self.save_dir, '%s_%.2f.png' % (d['class'].replace(' ', '_'), d['conf']))
+                        cv2.imwrite(new_path, annotated)
+                        self.saved_path[d['class']] = new_path
         else:
             self.get_logger().info('khung %d (%.0f ms): khong thay vat the' % (self.frames, ms))
 

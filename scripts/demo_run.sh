@@ -13,7 +13,7 @@ set -u
 
 cd ~/tb4_ws
 setsid nohup ros2 launch tb4_yolo lab05.launch.py world:=small_house x:=1.0 y:=1.0 \
-    run_yolo:=true run_navigator:=false \
+    run_yolo:=true run_navigator:=false save_dir:=$HOME/yolo_out \
     > "$LOG" 2>&1 < /dev/null &
 disown
 
