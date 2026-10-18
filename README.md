@@ -81,13 +81,23 @@ ros2 run tb4_yolo yolo_detector --ros-args -p use_sim_time:=true -p conf:=0.3
 
 Tham số hay dùng: `model` (`yolov8n.pt`, `yolo11n.pt`, ...), `conf` (mặc định 0.4), `imgsz` (mặc định 640), `image_topic` (mặc định `/oakd/rgb/preview/image_raw`), `rate` (số khung xử lý mỗi giây, mặc định 2), `dwell`. Mặc định không mở cửa sổ OpenCV, xem ảnh nhận diện trong RViz2: Add → By topic → `/yolo/image` → Image (hoặc `show_window:=true` để mở lại cửa sổ OpenCV).
 
-## 4. Tọa độ goal
+## 4. Chạy demo quay video
+
+```bash
+~/tb4_ws/src/Tb4_YOLO/scripts/demo_record.sh
+```
+
+Nếu hệ thống chưa chạy, script tự gọi `demo_run.sh`; nếu đã chạy (Nav2 active) thì dùng luôn. Script xóa danh sách goal đã nhấp trước đó (`/reset_goals` + xóa `~/tb4_clicked_goals.yaml`) để nhập lại từ đầu, rồi mở 3 cửa sổ terminal nhỏ: **LOG YOLO/GOAL** (log lọc theo node), **CLICKED POINT** (toạ độ điểm vừa nhấp), **GOAL NAVIGATOR** (`goal_navigator` chạy với `wait_for_goals:=3`, tự chờ đủ 3 điểm nhấp rồi mới bắt đầu đi). Nếu máy không có `gnome-terminal`, script in sẵn 3 lệnh để tự mở.
+
+Trong RViz2 bật **Publish Point** và nhấp 3 điểm trên bản đồ (tránh sát vật cản); cửa sổ GOAL NAVIGATOR tự đi qua lần lượt 3 điểm và in bảng tổng kết khi xong.
+
+## 5. Tọa độ goal
 
 Bật **Publish Point** trong RViz2, nhấp lên bản đồ và đọc `ros2 topic echo /clicked_point`; hoặc đặt robot tại vị trí đó và đọc `ros2 topic echo /amcl_pose --once`. Sửa `config/goals.yaml` (`yaw_deg` là hướng quay tính bằng độ). Tọa độ là tọa độ `map`, gốc tại điểm xuất phát của robot lúc vẽ bản đồ.
 
 Tọa độ mặc định trong file là ước lượng từ ảnh bản đồ, cần kiểm tra lại trên máy và chọn điểm trống, cách vật cản xa.
 
-## 5. Topic, action và node chính
+## 6. Topic, action và node chính
 
 | Thành phần | Vai trò |
 |---|---|
